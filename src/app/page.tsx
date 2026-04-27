@@ -33,6 +33,7 @@ import {
   Camera,
   MessageSquare,
   BarChart3,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -222,7 +223,7 @@ function HeroSection() {
         }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-32">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-32" style={{ textShadow: '0 2px 12px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4)' }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -272,7 +273,7 @@ function HeroSection() {
             <Button
               asChild
               size="lg"
-              className="bg-white text-fp-red hover:bg-gray-100 font-bold px-8 py-6 text-lg shadow-xl"
+              className="bg-white/15 text-white border border-white/25 backdrop-blur-md font-bold px-8 py-6 text-lg shadow-lg transition-all duration-300 hover:bg-white/25 hover:border-white/40 hover:shadow-xl hover:scale-[1.03]"
             >
               <a href="#registro">
                 <Users className="w-5 h-5 mr-2" />
@@ -282,8 +283,7 @@ function HeroSection() {
             <Button
               asChild
               size="lg"
-              variant="outline"
-              className="border-white/40 text-white hover:bg-white/10 px-8 py-6 text-lg backdrop-blur-sm"
+              className="bg-white/10 text-white border border-white/20 backdrop-blur-md font-bold px-8 py-6 text-lg shadow-lg transition-all duration-300 hover:bg-white/20 hover:border-white/35 hover:shadow-xl hover:scale-[1.03]"
             >
               <a href="#nosotros">
                 Conoce Más
@@ -948,55 +948,38 @@ function BlogSection() {
     content: string;
     publishedAt: string | null;
     author: string;
+    coverImage: string | null;
   } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [loadingPost, setLoadingPost] = useState(false);
 
   useEffect(() => {
     fetch("/api/blog")
-      .then((r) => r.json())
-      .then((data) => setPosts(data.posts || []))
-      .catch(() => {});
+      .then((r) => {
+        if (!r.ok) throw new Error("Error");
+        return r.json();
+      })
+      .then((data) => {
+        setPosts(data.posts || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
   }, []);
 
   const handlePostClick = (slug: string) => {
+    setLoadingPost(true);
     fetch(`/api/blog?slug=${slug}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.post) setSelectedPost(data.post);
+        setLoadingPost(false);
       })
-      .catch(() => {});
+      .catch(() => setLoadingPost(false));
   };
-
-  const defaultPosts = [
-    {
-      id: "1",
-      title: "SAPG convoca a asamblea nacional de profesionales",
-      slug: "asamblea-nacional",
-      excerpt:
-        "La Secretaría de Asuntos Profesionales y Gremiales anuncia la realización de una asamblea nacional que reunirá a profesionales de todo el país.",
-      coverImage: "/images/blog-thumb1.png",
-      publishedAt: "2025-05-06T10:00:00",
-    },
-    {
-      id: "2",
-      title: "Programa de capacitación para profesionales jóvenes",
-      slug: "capacitacion-jovenes",
-      excerpt:
-        "Lanzamos un programa de formación integral dirigido a profesionales jóvenes que desean potenciar sus habilidades y contribuir al desarrollo nacional.",
-      coverImage: "/images/gallery-event2.png",
-      publishedAt: "2025-04-28T10:00:00",
-    },
-    {
-      id: "3",
-      title: "Jornada de servicios comunitarios en Santo Domingo",
-      slug: "jornada-comunitaria",
-      excerpt:
-        "Profesionales de diversas áreas ofrecieron servicios gratuitos a la comunidad en una jornada exitosa celebrada en la capital.",
-      coverImage: "/images/gallery-event4.png",
-      publishedAt: "2025-04-15T10:00:00",
-    },
-  ];
-
-  const displayPosts = posts.length > 0 ? posts : defaultPosts;
 
   return (
     <section id="blog" className="py-20 md:py-28 bg-white" ref={ref}>
@@ -1020,7 +1003,26 @@ function BlogSection() {
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayPosts.map((post, i) => (
+          {loading && (
+            <div className="col-span-full text-center py-10">
+              <div className="w-8 h-8 border-4 border-fp-red/20 border-t-fp-red rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Cargando artículos...</p>
+            </div>
+          )}
+          {error && !loading && (
+            <div className="col-span-full text-center py-10">
+              <AlertCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">No se pudieron cargar los artículos. Intenta recargar la página.</p>
+            </div>
+          )}
+          {!loading && !error && posts.length === 0 && (
+            <div className="col-span-full text-center py-10">
+              <BookOpen className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground font-medium">Aún no hay artículos publicados.</p>
+              <p className="text-muted-foreground text-sm mt-1">Pronto publicaremos nuevas noticias y actualizaciones.</p>
+            </div>
+          )}
+          {!loading && posts.map((post, i) => (
             <motion.div
               key={post.id}
               initial={{ opacity: 0, y: 30 }}
@@ -1079,8 +1081,25 @@ function BlogSection() {
             <DialogHeader>
               <DialogTitle className="text-2xl">{selectedPost?.title}</DialogTitle>
             </DialogHeader>
-            {selectedPost && (
+            {loadingPost && (
+              <div className="text-center py-10">
+                <div className="w-8 h-8 border-4 border-fp-red/20 border-t-fp-red rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-muted-foreground">Cargando artículo...</p>
+              </div>
+            )}
+            {selectedPost && !loadingPost && (
               <div className="prose prose-gray max-w-none mt-4">
+                {/* Cover Image */}
+                {selectedPost.coverImage && (
+                  <div className="relative rounded-xl overflow-hidden mb-6 -mx-2">
+                    <img
+                      src={selectedPost.coverImage}
+                      alt={selectedPost.title}
+                      className="w-full h-64 sm:h-80 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                  </div>
+                )}
                 <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />

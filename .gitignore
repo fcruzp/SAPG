@@ -52,3 +52,13 @@ prompt
 server.log
 # Skills directory
 /skills/
+/examples/
+/mini-services/
+/upload/
+/download/
+search_results*.json
+search_logo.json
+bun.lock
+node_modules
+.next
+*.log

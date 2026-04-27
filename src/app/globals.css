@@ -144,9 +144,16 @@
   background: oklch(0.7 0 0 / 50%);
 }
 
-/* Hero gradient overlay */
+/* Hero gradient overlay — red-to-green, transparent top */
 .hero-overlay {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.85) 0%, rgba(22, 163, 74, 0.75) 100%);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(220, 38, 38, 0) 0%,
+      rgba(220, 38, 38, 0.15) 25%,
+      rgba(22, 163, 74, 0.45) 65%,
+      rgba(22, 163, 74, 0.75) 100%
+    );
 }
 
 /* Animated gradient text */

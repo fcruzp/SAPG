@@ -33,11 +33,14 @@ export async function GET(request: Request) {
       });
     }
 
-    // Get all published posts
+    // Check if admin wants all posts (including drafts)
+    const all = searchParams.get("all") === "true";
+
+    // Get posts
     const posts = await db.blogPost.findMany({
-      where: { published: true },
-      orderBy: { publishedAt: "desc" },
-      take: 10,
+      where: all ? {} : { published: true },
+      orderBy: { createdAt: "desc" },
+      take: 50,
     });
 
     return NextResponse.json({
@@ -48,7 +51,11 @@ export async function GET(request: Request) {
         slug: p.slug,
         excerpt: p.excerpt,
         coverImage: p.coverImage,
+        content: p.content,
+        author: p.author,
+        published: p.published,
         publishedAt: p.publishedAt,
+        createdAt: p.createdAt,
       })),
     });
   } catch (error) {

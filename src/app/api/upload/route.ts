@@ -17,8 +17,10 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const ext = path.extname(file.name) || ".png";
-    const filename = `upload-${Date.now()}${ext}`;
+    const name = file.name || "image";
+    const ext = path.extname(name) || ".png";
+    const safeName = path.basename(name, ext).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const filename = `${safeName}-${Date.now()}${ext}`;
     const uploadDir = path.join(process.cwd(), "public", "images", "uploads");
 
     await mkdir(uploadDir, { recursive: true });
@@ -39,3 +41,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const runtime = "nodejs";

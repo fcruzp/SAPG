@@ -166,7 +166,7 @@ export function AdminPanel({
   const loadPosts = async () => {
     setLoadingPosts(true);
     try {
-      const res = await fetch("/api/blog");
+      const res = await fetch("/api/blog?all=true");
       const data = await res.json();
       if (data.success) setPosts(data.posts || []);
     } catch { /* silent */ }
@@ -236,43 +236,66 @@ export function AdminPanel({
       });
       const data = await res.json();
       if (data.success) {
-        toast({ title: editingPost ? "Artículo actualizado" : "Artículo creado" });
+        toast({
+          title: editingPost ? "Artículo actualizado" : "Artículo creado",
+          description: `"${editorData.title}" se guardó correctamente.`,
+        });
         setShowPostEditor(false);
         loadPosts();
       } else {
-        toast({ title: "Error", description: data.error, variant: "destructive" });
+        toast({ title: "Error", description: data.error || "No se pudo guardar el artículo.", variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error de conexión", variant: "destructive" });
+      toast({ title: "Error de conexión", description: "No se pudo conectar con el servidor. Intenta de nuevo.", variant: "destructive" });
     } finally {
       setSavingPost(false);
     }
   };
 
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+
   const deletePost = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este artículo?")) return;
+    const postToDelete = posts.find(p => p.id === id);
+    const postTitle = postToDelete?.title || "este artículo";
+    if (!confirm(`¿Estás seguro de eliminar "${postTitle}"?`)) return;
+    setDeletingPostId(id);
     try {
       const res = await fetch(`/api/blog/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
-        toast({ title: "Artículo eliminado" });
+        toast({ title: "Artículo eliminado", description: `"${postTitle}" fue eliminado correctamente.` });
         loadPosts();
+      } else {
+        toast({ title: "Error al eliminar", description: data.error || "No se pudo eliminar el artículo.", variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error al eliminar", variant: "destructive" });
+      toast({ title: "Error de conexión", description: "No se pudo conectar con el servidor.", variant: "destructive" });
+    } finally {
+      setDeletingPostId(null);
     }
   };
 
   const togglePublish = async (post: BlogPost) => {
+    const newPublished = !post.published;
     try {
       const res = await fetch(`/api/blog/${post.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ published: !post.published }),
+        body: JSON.stringify({ published: newPublished }),
       });
       const data = await res.json();
-      if (data.success) loadPosts();
-    } catch { /* silent */ }
+      if (data.success) {
+        toast({
+          title: newPublished ? "Artículo publicado" : "Artículo despublicado",
+          description: `"${post.title}" ahora está ${newPublished ? "publicado" : "como borrador"}.`,
+        });
+        loadPosts();
+      } else {
+        toast({ title: "Error", description: data.error || "No se pudo cambiar el estado.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error de conexión", description: "No se pudo conectar con el servidor.", variant: "destructive" });
+    }
   };
 
   // Upload image
@@ -598,14 +621,37 @@ export function AdminPanel({
                           </p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <Button size="icon" variant="ghost" onClick={() => togglePublish(post)} title={post.published ? "Despublicar" : "Publicar"}>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={(e) => { e.stopPropagation(); togglePublish(post); }}
+                            title={post.published ? "Despublicar" : "Publicar"}
+                            className="hover:bg-fp-green/10 hover:text-fp-green"
+                          >
                             {post.published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => openEditPost(post)} title="Editar">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={(e) => { e.stopPropagation(); openEditPost(post); }}
+                            title="Editar"
+                            className="hover:bg-blue-100 hover:text-blue-600"
+                          >
                             <Pencil className="w-4 h-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => deletePost(post.id)} title="Eliminar">
-                            <Trash2 className="w-4 h-4" />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive hover:bg-red-50"
+                            onClick={(e) => { e.stopPropagation(); deletePost(post.id); }}
+                            title="Eliminar"
+                            disabled={deletingPostId === post.id}
+                          >
+                            {deletingPostId === post.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
                           </Button>
                         </div>
                       </CardContent>
