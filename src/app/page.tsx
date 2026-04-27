@@ -95,9 +95,11 @@ function Navbar() {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <a href="#inicio" className="flex items-center gap-3">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-fp-red to-fp-green flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg">
-              FP
-            </div>
+            <img
+              src="/images/fp-logo.png"
+              alt="SAPG Fuerza del Pueblo"
+              className={`w-10 h-10 md:w-12 md:h-12 rounded-full object-cover shadow-lg border-2 ${scrolled ? 'border-white' : 'border-white/50'}`}
+            />
             <div className="hidden sm:block">
               <p
                 className={`font-bold text-sm md:text-base leading-tight ${scrolled ? "text-gray-900" : "text-white"}`}
@@ -1837,9 +1839,11 @@ function Footer() {
           {/* About */}
           <div>
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-fp-red to-fp-green flex items-center justify-center text-white font-bold text-xl">
-                FP
-              </div>
+              <img
+                src="/images/fp-logo.png"
+                alt="SAPG Fuerza del Pueblo"
+                className="w-12 h-12 rounded-full object-cover border-2 border-gray-700"
+              />
               <div>
                 <p className="font-bold">SAPG</p>
                 <p className="text-xs text-gray-400">

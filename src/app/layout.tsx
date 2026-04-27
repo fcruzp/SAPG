@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "SAPG Fuerza del Pueblo" }],
   icons: {
-    icon: "/images/logo-icon.png",
+    icon: "/images/fp-logo.png",
   },
   openGraph: {
     title: "SAPG - Secretar\u00eda de Asuntos Profesionales y Gremiales",
