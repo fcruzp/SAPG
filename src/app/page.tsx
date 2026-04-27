@@ -32,6 +32,7 @@ import {
   BookOpen,
   Camera,
   MessageSquare,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -56,6 +57,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { AdminPanel } from "@/components/admin/admin-panel";
 
 // ============================================================
 // Navigation
@@ -1992,6 +1994,8 @@ function BackToTop() {
 // Main Page
 // ============================================================
 export default function Home() {
+  const [showAdmin, setShowAdmin] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -2010,6 +2014,18 @@ export default function Home() {
       </main>
       <Footer />
       <BackToTop />
+
+      {/* Admin Access Button - bottom left corner */}
+      <button
+        onClick={() => setShowAdmin(true)}
+        className="fixed bottom-6 left-6 z-40 w-10 h-10 rounded-full bg-gray-800 text-white hover:bg-gray-700 shadow-lg transition-colors flex items-center justify-center"
+        title="Panel de Administración"
+      >
+        <BarChart3 className="w-5 h-5" />
+      </button>
+
+      {/* Admin Panel */}
+      {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
     </div>
   );
 }
